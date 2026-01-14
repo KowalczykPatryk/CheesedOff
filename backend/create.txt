@@ -1,0 +1,5 @@
+Stworzenie głównego folderu projektu z plikiem settings.py:
+django-admin startproject config .
+
+Tworzenie struktury aplikacji:
+python manage.py startapp users apps/users
