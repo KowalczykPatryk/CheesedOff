@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+
+# Node modules
+frontend/node_modules/
+
+# Vite / build output
+frontend/dist/
+frontend/build/
