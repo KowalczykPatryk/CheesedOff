@@ -1,30 +1,33 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, TextField, Stack, Container, Paper, Snackbar, Alert } from "@mui/material";
 
 function Register() 
 {
+    const navigate = useNavigate();
     const [form, setForm] = useState({
         username: "",
         email: "",
         password: "",
     });
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [notification, setNotification] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    })
 
     function handleChange(e) 
     {
         setForm({
-        ...form,
-        [e.target.name]: e.target.value,
+            ...form,
+            [e.target.name]: e.target.value,
         });
     }
 
     async function handleSubmit(e) 
     {
         e.preventDefault();
-
-        setError("");
-        setSuccess("");
 
         const res = await fetch("/api/users/register/", {
             method: "POST",
@@ -38,46 +41,76 @@ function Register()
 
         if (!res.ok) 
         {
-            setError(data.error || "Registration failed");
+            setNotification({...notification, open: true, message: Object.values(data).flat().join(" ") || "Registration failed", severity: "error"});
             return;
         }
-
-        setSuccess("Account created successfully");
+        setNotification({...notification, open: true, message: data.message, severity: "success"});
+        setForm({ username: "", email: "", password: "" });
+        setTimeout(() => navigate("/login"), 1000);
     }
 
     return (
-        <div>
-            <h1>Register</h1>
+        <>
+            <Button component={Link} to="/" variant="contained">Home</Button>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {success && <p style={{ color: "green" }}>{success}</p>}
+            <Container maxWidth="sm">
+                <Paper elevation={3} sx={{ p: 3, mt: 20 }}>
+                    <Stack spacing={2}>
+                        <h1>Register</h1>
+                        <form onSubmit={handleSubmit}>
+                            <Stack spacing={1}>
+                                <TextField 
+                                label="Username" 
+                                name="username"
+                                variant="outlined"
+                                margin="normal"
+                                value={form.username}
+                                onChange={handleChange}
+                                />
 
-            <form onSubmit={handleSubmit}>
-                <input
-                name="username"
-                placeholder="Username"
-                value={form.username}
-                onChange={handleChange}
-                /><br />
+                                <TextField 
+                                label="Email" 
+                                name="email"
+                                variant="outlined"
+                                margin="normal"
+                                value={form.email}
+                                onChange={handleChange}
+                                />
 
-                <input
-                name="email"
-                placeholder="Email"
-                value={form.email}
-                onChange={handleChange}
-                /><br />
+                                <TextField 
+                                label="Password" 
+                                name="password"
+                                type="password"
+                                variant="outlined"
+                                margin="normal"
+                                value={form.password}
+                                onChange={handleChange}
+                                />
 
-                <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                /><br />
+                                <Button type="submit" variant="contained">Register</Button>
 
-                <button type="submit">Register</button>
-            </form>
-        </div>
+                                <p>Already have an account? <Link to="/login">Login</Link></p>
+                            </Stack>
+                        </form>
+                    </Stack>
+                </Paper>
+            </Container>
+
+            <Snackbar
+            open={notification.open}
+            autoHideDuration={3000}
+            onClose={() => setNotification({...notification, open: false})}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+                <Alert 
+                onClose={() => setNotification({...notification, open: false})} 
+                severity={notification.severity} 
+                variant="filled"
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
+        </>
     );
 }
 

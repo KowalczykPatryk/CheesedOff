@@ -1,15 +1,21 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {Button, TextField, Stack, Container, Paper, Snackbar, Alert} from "@mui/material";
 
 
 function Login() 
 {
+    const navigate = useNavigate();
     const [form, setForm] = useState({
         username: "",
         password: "",
     });
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [notification, setNotification] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    })
 
     function handleChange(e) 
     {
@@ -23,9 +29,6 @@ function Login()
     {
         e.preventDefault();
 
-        setError("");
-        setSuccess("");
-
         const res = await fetch("/api/users/login/", {
             method: "POST",
             headers: {
@@ -38,40 +41,69 @@ function Login()
 
         if (!res.ok) 
         {
-            setError(data.error || "Login failed");
+            setNotification({...notification, open: true, message: Object.values(data).flat().join(' '), severity: "error"});
             return;
         }
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
-        setSuccess("You are logged in");
+        setNotification({...notification, open: true, message: data.message, severity: "success"});
+        setForm({username: "", password: ""});
+        setTimeout(() => navigate("/", { replace: true }), 1000);
     }
 
     return (
-        <div>
-            <h1>Login</h1>
+        <>
+            <Button component={Link} to="/" variant="contained">Home</Button>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {success && <p style={{ color: "green" }}>{success}</p>}
+            <Container maxWidth="sm">
+                <Paper elevation={3} sx={{ p: 3, mt: 20 }}>
+                    <Stack spacing={2}>
+                        <h1>Login</h1>
+                        <form onSubmit={handleSubmit}>
+                            <Stack spacing={1}>
+                                <TextField 
+                                label="Username" 
+                                name="username"
+                                variant="outlined"
+                                margin="normal"
+                                value={form.username}
+                                onChange={handleChange}
+                                />
 
-            <form onSubmit={handleSubmit}>
-                <input
-                name="username"
-                placeholder="Username"
-                value={form.username}
-                onChange={handleChange}
-                /><br />
+                                <TextField 
+                                label="Password" 
+                                name="password"
+                                type="password"
+                                variant="outlined"
+                                margin="normal"
+                                value={form.password}
+                                onChange={handleChange}
+                                />
 
-                <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                /><br />
+                                <Button type="submit" variant="contained">Login</Button>
 
-                <button type="submit">Login</button>
-            </form>
-        </div>
+                                <p>Don't have an account? <Link to="/login">Register</Link></p>
+                            </Stack>
+                        </form>
+                    </Stack>
+                </Paper>
+            </Container>
+
+            <Snackbar
+            open={notification.open}
+            autoHideDuration={3000}
+            onClose={() => setNotification({...notification, open: false})}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+                <Alert 
+                onClose={() => setNotification({...notification, open: false})} 
+                severity={notification.severity} 
+                variant="filled"
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
+        </>
     );
 }
 export default Login;

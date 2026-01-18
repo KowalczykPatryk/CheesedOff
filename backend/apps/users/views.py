@@ -14,7 +14,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {"message": "User created"},
+                {"message": "Account created successfully"},
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -30,6 +30,7 @@ class LoginView(APIView):
         if user is not None:
             refresh = RefreshToken.for_user(user)
             return Response({
+                "message": "Welcome",
                 "accessToken": str(refresh.access_token),
                 "refreshToken": str(refresh)
             })
