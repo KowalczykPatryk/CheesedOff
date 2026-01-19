@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {Button, TextField, Stack, Container, Paper, Snackbar, Alert} from "@mui/material";
 
 
 function Login() 
 {
     const navigate = useNavigate();
+    const location = useLocation();
     const [form, setForm] = useState({
         username: "",
         password: "",
@@ -51,6 +52,13 @@ function Login()
         setTimeout(() => navigate("/", { replace: true }), 1000);
     }
 
+    useEffect(() => {
+        if (location.state?.notification) 
+        {
+            setNotification({ open: true, ...location.state.notification,});
+        }
+    }, [location.state]);
+
     return (
         <>
             <Button component={Link} to="/" variant="contained">Home</Button>
@@ -82,7 +90,7 @@ function Login()
 
                                 <Button type="submit" variant="contained">Login</Button>
 
-                                <p>Don't have an account? <Link to="/login">Register</Link></p>
+                                <p>Don't have an account? <Link to="/register">Register</Link></p>
                             </Stack>
                         </form>
                     </Stack>
