@@ -2,7 +2,6 @@ function DripingCheese()
 {
     return (
         <>
-        <div className="drip-background">
             <div className="cont">
                 <div className="drip"></div>
                 <div className="drip"></div>
@@ -35,23 +34,15 @@ function DripingCheese()
                 </defs>
                 </svg>
             </div>
-        </div>
             <style>{`
-                .drip-background {
-                position: fixed;
-                inset: 0;
-                z-index: -1;
-                pointer-events: none;
-                }
                 .cont{
-                width:100%;
-                height:100vh;
-                position:relative;
+                inset: 0;
+                position:fixed;
                 overflow:hidden;
-                border-top:15px solid #f9c02e;
-                border-bottom:15px solid #f9c02e;
+                border-top:50px solid #f9c02e;
+                border-bottom:60px solid #f9c02e;
                 filter:url("#goo");
-                box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+                pointer-events: none;
                 }
                 .cont .drip{
                 height:30px;
@@ -69,8 +60,8 @@ function DripingCheese()
                 50%{
                     top:0%;
                 }
-                80%{
-                    top:80%;
+                90%{
+                    top:97%;
                 }
                 100%{
                     top:100%;
