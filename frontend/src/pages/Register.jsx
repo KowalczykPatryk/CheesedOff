@@ -62,7 +62,6 @@ function Register()
                                 <TextField 
                                 label="Username" 
                                 name="username"
-                                variant="outlined"
                                 margin="normal"
                                 value={form.username}
                                 onChange={handleChange}
@@ -71,7 +70,6 @@ function Register()
                                 <TextField 
                                 label="Email" 
                                 name="email"
-                                variant="outlined"
                                 margin="normal"
                                 value={form.email}
                                 onChange={handleChange}
@@ -81,7 +79,6 @@ function Register()
                                 label="Password" 
                                 name="password"
                                 type="password"
-                                variant="outlined"
                                 margin="normal"
                                 value={form.password}
                                 onChange={handleChange}
