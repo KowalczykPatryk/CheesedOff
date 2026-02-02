@@ -41,4 +41,5 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/gradient/radia
 https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/background-image
 https://www.w3schools.com/css/css3_gradients_radial.asp#:~:text=A%20radial%20gradient%20defines%20a,to%20render%20smooth%20transitions%20among
 https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Django/
+https://developer.mozilla.org/en-US/docs/Web/API/FileReader
 

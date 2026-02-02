@@ -43,6 +43,7 @@ function DripingCheese()
                 border-bottom:60px solid #f9c02e;
                 filter:url("#goo");
                 pointer-events: none;
+                z-index:-1;
                 }
                 .cont .drip{
                 height:30px;

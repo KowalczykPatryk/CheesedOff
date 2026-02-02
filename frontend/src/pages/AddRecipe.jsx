@@ -1,34 +1,68 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input, Typography, Snackbar, Alert } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 
 function AddRecipe()
 {
+    const navigate = useNavigate();
     const [form, setForm] = useState({
-        recipeName: "",
+        title: "",
+        image: null,
+        instructions: "",
+    });
+    const [notification, setNotification] = useState({
+        open: false,
+        message: "",
+        severity: "success"
     });
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
-    function handleChange(e) 
+    function handleTitleChange(e) 
     {
         setForm({
             ...form,
-            [e.target.name]: e.target.value,
+            title: e.target.value,
         });
     };
 
-    function handleImageChange(e) {
+    function handleImageChange(e) 
+    {
         const file = e.target.files[0];
         setSelectedImage(file);
         
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
+            reader.onload = () => {
                 setImagePreview(reader.result);
             };
             reader.readAsDataURL(file);
+            setForm({...form, image: file});
+        } else {
+            setImagePreview(null);
+        }
+    };
+    function handleTextChange(e)
+    {
+        setForm({
+            ...form,
+            instructions: e.target.value,
+        });
+    }
+    function handleDrop(e) 
+    {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        setSelectedImage(file);
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+            setForm({...form, image: file});
         } else {
             setImagePreview(null);
         }
@@ -37,22 +71,48 @@ function AddRecipe()
     async function handleSubmit(e)
     {
         e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('title', form.title);
+        formData.append('instructions', form.instructions);
+        if (form.image) {
+            formData.append('image', form.image);
+        }
+        
+        const res = await fetch("/api/recipes/add/", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) 
+        {
+            setNotification({...notification, open: true, message: Object.values(data).flat().join(" ") || "Adding recipe failed", severity: "error"});
+            return;
+        }
+        setNotification({...notification, open: true, message: data.message, severity: "success"});
+        setForm({ title: "", image: null, instructions: "" });
+        setTimeout(() => navigate("/recipes"), 1000);
     };
 
     return (
         <>
-            <Button component={Link} to="/" variant="contained">Home</Button>
+            <Button component={Link} to="/" variant="contained" sx={{position: 'fixed', top: 10, left: 10}}>Home</Button>
             <Container maxWidth="md" sx={{ mt: 4 }}>
                 <Paper elevation={3} sx={{ p: 3 }}>
                     <Stack spacing={2}>
-                        <h1>Add Recipe</h1>
+                        <Typography variant="h4">Add Recipe</Typography>
                         <form onSubmit={handleSubmit}>
                             <Stack spacing={2}>
                                 <TextField 
-                                label="Recipe Name" 
-                                name="recipeName" fullWidth required 
-                                value={form.recipeName}
-                                onChange={handleChange}
+                                label="Recipe Title" 
+                                name="title" fullWidth required 
+                                value={form.title}
+                                onChange={handleTitleChange}
                                 />
                                 <Button
                                 variant="contained"
@@ -69,7 +129,11 @@ function AddRecipe()
                                 </Button>
                                 <Paper elevation={2} sx={{ p: 2, textAlign: 'center', minHeight: '200px' }}>
                                     {imagePreview ? (
-                                        <div>
+                                        <div
+                                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                                        onDrop={handleDrop}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        >
                                             <img 
                                                 src={imagePreview} 
                                                 alt="Recipe preview" 
@@ -80,14 +144,11 @@ function AddRecipe()
                                             </p>
                                         </div>
                                     ) : (
-                                        <div style={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center', 
-                                            height: '200px',
-                                            color: 'gray'
-                                        }}>
-                                            Image preview will appear here
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: 'gray'}}
+                                        onDrop={handleDrop}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        >
+                                            After you select or drop an image, a preview will appear here
                                         </div>
                                     )}
                                 </Paper>
@@ -96,6 +157,7 @@ function AddRecipe()
                                     minRows={10}
                                     placeholder="Your recipe instructions..."
                                     style={{ width: "96%", padding: "15px", fontSize: "16px" }}
+                                    onChange={handleTextChange}
                                     />
                                 </Tooltip>
                                 <Button type="submit" variant="contained" color="primary">Submit</Button>
@@ -104,6 +166,20 @@ function AddRecipe()
                     </Stack>
                 </Paper>
             </Container>
+            <Snackbar
+            open={notification.open}
+            autoHideDuration={3000}
+            onClose={() => setNotification({...notification, open: false})}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+                <Alert 
+                onClose={() => setNotification({...notification, open: false})} 
+                severity={notification.severity} 
+                variant="filled"
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </>
     )
 }
