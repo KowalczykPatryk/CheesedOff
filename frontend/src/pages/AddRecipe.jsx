@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input, Typography, Snackbar, Alert } from "@mui/material";
+import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 
 function AddRecipe()
 {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         title: "",
         image: null,
@@ -71,6 +72,7 @@ function AddRecipe()
     async function handleSubmit(e)
     {
         e.preventDefault();
+        setLoading(true);
         
         const formData = new FormData();
         formData.append('title', form.title);
@@ -92,15 +94,18 @@ function AddRecipe()
         if (!res.ok) 
         {
             setNotification({...notification, open: true, message: Object.values(data).flat().join(" ") || "Adding recipe failed", severity: "error"});
+            setLoading(false);
             return;
         }
         setNotification({...notification, open: true, message: data.message, severity: "success"});
         setForm({ title: "", image: null, instructions: "" });
-        setTimeout(() => navigate("/recipes"), 1000);
+        setTimeout(() => navigate("/recipes"), 500);
+        setLoading(false);
     };
 
     return (
         <>
+            {loading && <CircularProgress sx={{position: 'fixed', top: '50%', left: '50%'}}/>}
             <Button component={Link} to="/" variant="contained" sx={{position: 'fixed', top: 10, left: 10}}>Home</Button>
             <Container maxWidth="md" sx={{ mt: 4 }}>
                 <Paper elevation={3} sx={{ p: 3 }}>

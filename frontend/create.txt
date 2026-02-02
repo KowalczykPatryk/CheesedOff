@@ -1,5 +1,8 @@
 Creates static files that django can serve
 npm run build
 
+To run in the release
+cd frontend && npm run build && cp dist/index.html ../backend/templates/index.html
+
 Starts react development server that serves files
 npm run dev

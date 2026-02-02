@@ -214,3 +214,11 @@ frontend/node_modules/
 # Vite / build output
 frontend/dist/
 frontend/build/
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Media files (user uploads)
+backend/media/
+media/

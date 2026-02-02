@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
+import { Button, Typography, Snackbar, Alert, CircularProgress, Card, CardHeader, CardMedia, CardContent, Avatar, Tooltip, Rating } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 
 function Recipes()
@@ -36,6 +36,21 @@ function Recipes()
         }
         setLoading(false);
     }
+    const stripMarkdown = (text) => {
+        return text
+            .replace(/#{1,6}\s?/g, '')
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/`(.*?)`/g, '$1')
+            .replace(/```[\s\S]*?```/g, '')
+            .replace(/\[([^\]]*)\]\([^\)]*\)/g, '$1')
+            .replace(/!\[([^\]]*)\]\([^\)]*\)/g, '')
+            .replace(/>\s/g, '')
+            .replace(/^\s*[-*+]\s/gm, '')
+            .replace(/^\s*\d+\.\s/gm, '') 
+            .replace(/\n+/g, ' ')
+            .trim();
+    };
 
     return (
         <>
@@ -44,14 +59,29 @@ function Recipes()
                 Refresh Recipes
             </Button>
             {loading ? (
-                <CircularProgress />
+                <CircularProgress sx={{position: 'fixed', top: '50%', left: '50%'}}/>
             ):(
                 <>
                     {recipes.map(recipe => (
-                        <div key={recipe.id}>
-                            <Typography variant="h5">{recipe.title}</Typography>
-                            <Typography variant="body1">{recipe.author}</Typography>
-                        </div>
+                        <Card key={recipe.id} sx={{ maxWidth: 600, margin: '20px auto' }}>
+                            <CardHeader
+                                avatar={<Tooltip title={recipe.author} placement="left-start"><Avatar><PhotoCamera /></Avatar></Tooltip>}
+                                title={recipe.title}
+                                subheader={new Date(recipe.updated_at).toLocaleDateString()}
+                            />
+                            <CardMedia
+                                component="img"
+                                image={recipe.image}
+                                alt={recipe.title}
+                                style={{maxHeight: 400, objectFit: 'cover'}}
+                            />
+                            <CardContent>
+                                <Typography variant="body2">
+                                    {stripMarkdown(recipe.instructions).length > 200 ? stripMarkdown(recipe.instructions).substring(0,200) + "..." : stripMarkdown(recipe.instructions)}
+                                </Typography>
+                            </CardContent>
+                            <Rating sx={{ ml: 2, mb: 2 }} defaultValue={2} size="medium" />
+                        </Card>
                     ))}
                 </>
             )}
