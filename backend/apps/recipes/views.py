@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 from .serializers import RecipeSerializer
-from .models import Recipe
+from .models import Recipe, Rating
 
 
 class RecipesView(APIView):
@@ -50,3 +50,26 @@ class EditRecipeView(UpdateAPIView):
         if recipe.author != request.user:
             return Response({"message": "You do not have permission to edit this recipe."}, status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
+
+class RateRecipeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, recipe_id):
+        try:
+            recipe = Recipe.objects.get(id=recipe_id)
+        except Recipe.DoesNotExist:
+            return Response({"message": "Recipe not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        rating_value = request.data.get('rating')
+        if not rating_value or not (1 <= int(rating_value) <= 5):
+            return Response({"message": "Rating must be between 1 and 5"}, status=status.HTTP_400_BAD_REQUEST)
+        rating, created = Rating.objects.update_or_create(
+            recipe=recipe,
+            user=request.user,
+            defaults={'rating': rating_value}
+        )
+
+        action = "created" if created else "updated"
+        return Response({
+            "message": f"Rating {action} successfully"
+        })

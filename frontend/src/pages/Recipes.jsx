@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Typography, Snackbar, Alert, CircularProgress, Card, CardHeader, CardMedia, CardContent, Avatar, Tooltip, Rating } from "@mui/material";
-import { Photo, PhotoCamera } from "@mui/icons-material";
+import { PhotoCamera, Star } from "@mui/icons-material";
 
 function Recipes()
 {
@@ -56,6 +56,25 @@ function Recipes()
     {
         navigate(`/recipes/${recipeId}`);
     }
+    async function sendRating(recipeId, event, newValue)
+    {
+        if (!newValue) return;
+        const res = await fetch(`/api/recipes/rate/${recipeId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            body: JSON.stringify({ rating: newValue })
+        });
+
+        if (res.ok) {
+            setNotification({...notification, open: true, message: "Rating submitted successfully", severity: "success"});
+            fetchRecipes();
+        } else {
+            setNotification({...notification, open: true, message: "Failed to submit rating", severity: "error"});
+        }
+    }
 
 
     return (
@@ -79,6 +98,12 @@ function Recipes()
                                 </Tooltip>}
                                 title={recipe.title}
                                 subheader={new Date(recipe.updated_at).toLocaleDateString()}
+                                action={
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span>{recipe.average_rating} / 5</span>
+                                        <Star fontSize="small" sx={{ color: '#ffae00'}}/>
+                                    </div>
+                                }
                             />
                             {recipe.image ? (
                                 <CardMedia
@@ -106,7 +131,10 @@ function Recipes()
                                     Click to read more
                                 </Typography>
                             </CardContent>
-                            <Rating sx={{ ml: 2, mb: 2 }} defaultValue={2} size="medium" />
+                            <Rating sx={{ ml: 2, mb: 2 }} value={recipe.user_rating || 0} defaultValue={2} size="medium" onChange={(event, newValue) => sendRating(recipe.id, event, newValue)} />
+                            <Typography variant="caption" color="text.secondary" sx={{ ml: 2, mb: 2, display: 'block' }}>
+                                {recipe.rating_count} ratings
+                            </Typography>
                         </Card>
                     ))}
                 </>
