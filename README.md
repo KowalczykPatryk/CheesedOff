@@ -2,7 +2,7 @@
 Projekt zrealizowany jako aplikacja typu SPA (Single Page Application) z wykorzystaniem 
 biblioteki React oraz języka TypeScript. Część serwerowa wykonana 
 w technologii Django z użyciem Django REST Framework i komunikuje 
-się z relacyjną bazą danych PostgreSQL. Uwierzytelnienie użytkowników 
+się z relacyjną bazą danych SQLite. Uwierzytelnienie użytkowników 
 zrealizowane z użyciem tokenów JWT zapisywanych lokalnie w localStorage oraz przesyłanych w nagłówku przy komunikacji ze strzeżonymi endpointami. Aplikacja obsługuje trzy role użytkowników. Komunikacja pomiędzy frontendem a 
 backendem odbywać się będzie w stylu REST. Frontend zrealizowany z użyciem componentów [material UI](https://mui.com/material-ui/). 
 Interfejs użytkownika zgodny ze standardem HTML5 i poprawnie walidowany przez W3C.
@@ -15,16 +15,14 @@ Wyjaśnienie:
 cheesed off [UK informal] - annoyed and disappointed with something or someone
 
 Założenia funkcjonalne:
-Możliwość dodawania przepisów na posiłek w formacie markdown. Podpiecia 
-przepisu pod nazwe dania.Możliwość dołączenia zdjęć. Modyfikowanie przepisu 
-przez twórce. Przeglądanie przepisów. Dodawanie łapek w góre lub w dół. 
+Możliwość dodawania przepisów na posiłek w formacie markdown, który będzie przy wyświetlaniu zamieniany na html.
+Możliwość dołączenia zdjęć. Modyfikowanie przepisu 
+przez twórce. Przeglądanie przepisów. Dodawanie oceny. 
 
 Role użytkowników:
 1. Użytkownik niezalogowany
 2. Twórca przepisu
 3. Zwykły użytkownik myślący: "Co by tutaj dzisiaj ugotować?"
-
-Encje bazy danych:
 
 
 Efekt cieknącego sera został w pełni zaczerpnięty z [tej strony](https://codes4education.com/pure-css-dripping-liquid-effect-animated-background/)
@@ -42,4 +40,5 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/background
 https://www.w3schools.com/css/css3_gradients_radial.asp#:~:text=A%20radial%20gradient%20defines%20a,to%20render%20smooth%20transitions%20among
 https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Django/
 https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+https://medium.com/builtfordevs/how-to-transform-markdown-into-html-using-javascript-and-npm-4328a177570a
 

@@ -6,6 +6,7 @@ import DehazeIcon from '@mui/icons-material/Dehaze';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import FormatListBulletedAddIcon from '@mui/icons-material/FormatListBulletedAdd';
 import { isLoggedIn } from "../utils/auth";
@@ -68,9 +69,17 @@ function Home()
                             <ListItem key="myRecipes" disablePadding onClick={() => navigate("/recipes/my")}>
                                 <ListItemButton>
                                 <ListItemIcon>
-                                    <PersonIcon />
+                                    <AutoStoriesIcon />
                                 </ListItemIcon>
                                 <ListItemText primary="My Recipes" />
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem key="profile" disablePadding onClick={() => navigate("/profile")}>
+                                <ListItemButton>
+                                <ListItemIcon>
+                                    <PersonIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="My Profile" />
                                 </ListItemButton>
                             </ListItem>
                         </>
