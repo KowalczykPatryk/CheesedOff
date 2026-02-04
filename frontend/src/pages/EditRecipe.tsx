@@ -3,29 +3,41 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 
+interface RecipeForm {
+  title: string;
+  image: File | null;
+  instructions: string;
+}
+
+interface Notification {
+  open: boolean;
+  message: string;
+  severity: "success" | "error" | "info" | "warning";
+}
+
 function EditRecipe()
 {
     const navigate = useNavigate();
-    const { id } = useParams();
-    const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({
+    const { id } = useParams<{ id: string }>();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [form, setForm] = useState<RecipeForm>({
         title: "",
         image: null,
         instructions: "",
     });
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
     });
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     useEffect(() => {
         loadCurrentRecipeData();
     }, []);
 
-    function handleTitleChange(e) 
+    function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
         setForm({
             ...form,
@@ -33,15 +45,21 @@ function EditRecipe()
         });
     };
 
-    function handleImageChange(e) 
+    function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
-        const file = e.target.files[0];
-        setSelectedImage(file);
+        const files = e.target.files;
+        if (!files || files.length === 0) {
+            setSelectedImage(null);
+            setImagePreview(null);
+            return;
+        }
+        const file = files[0];
+        setSelectedImage(file || null);
         
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setImagePreview(reader.result);
+                setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
             setForm({...form, image: file});
@@ -49,23 +67,29 @@ function EditRecipe()
             setImagePreview(null);
         }
     };
-    function handleTextChange(e)
+    function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>)
     {
         setForm({
             ...form,
             instructions: e.target.value,
         });
     }
-    function handleDrop(e) 
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) 
     {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        setSelectedImage(file);
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) {
+            setSelectedImage(null);
+            setImagePreview(null);
+            return;
+        }
+        const file = files[0];
+        setSelectedImage(file || null);
 
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setImagePreview(reader.result);
+                setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
             setForm({...form, image: file});
@@ -87,15 +111,16 @@ function EditRecipe()
             setForm({
                 title: data.title,
                 instructions: data.instructions,
+                image: null,
             });
-            setImagePreview(data.image);
+            setImagePreview(data.image as string);
 
-            document.getElementById("title").value = data.title;
-            document.getElementById("instructions").value = data.instructions;
+            (document.getElementById("title") as HTMLInputElement).value = data.title;
+            (document.getElementById("instructions") as HTMLTextAreaElement).value = data.instructions;
         }
     }
 
-    async function handleSubmit(e)
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>)
     {
         e.preventDefault();
         setLoading(true);
@@ -136,7 +161,7 @@ function EditRecipe()
             <Container maxWidth="md" sx={{ mt: 4 }}>
                 <Paper elevation={3} sx={{ p: 3 }}>
                     <Stack spacing={2}>
-                        <Typography variant="h4">Add Recipe</Typography>
+                        <Typography variant="h4">Edit Recipe</Typography>
                         <form onSubmit={handleSubmit}>
                             <Stack spacing={2}>
                                 <TextField 
@@ -190,6 +215,7 @@ function EditRecipe()
                                     minRows={10}
                                     placeholder="Your recipe instructions..."
                                     style={{ width: "96%", padding: "15px", fontSize: "16px" }}
+                                    value={form.instructions}
                                     onChange={handleTextChange}
                                     />
                                 </Tooltip>

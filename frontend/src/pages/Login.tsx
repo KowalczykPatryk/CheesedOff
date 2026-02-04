@@ -2,23 +2,33 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {Button, TextField, Stack, Container, Paper, Snackbar, Alert} from "@mui/material";
 
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+
+interface LoginForm {
+    username: string;
+    password: string;
+}
 
 function Login() 
 {
     const navigate = useNavigate();
     const location = useLocation();
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<LoginForm>({
         username: "",
         password: "",
     });
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
     })
 
-    function handleChange(e) 
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
         setForm({
         ...form,
@@ -26,7 +36,7 @@ function Login()
         });
     }
 
-    async function handleSubmit(e) 
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) 
     {
         e.preventDefault();
 

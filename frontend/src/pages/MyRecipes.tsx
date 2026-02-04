@@ -1,15 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Typography, Snackbar, Alert, CircularProgress, Card, CardHeader, CardMedia, CardContent, Avatar, Tooltip, Rating } from "@mui/material";
-import { PhotoCamera, Star } from "@mui/icons-material";
+import { Button, Typography, Snackbar, Alert, CircularProgress, Card, CardHeader, CardMedia, CardContent, Avatar, Tooltip, IconButton } from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
+import EditIcon from '@mui/icons-material/Edit';
 
-function Recipes()
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+interface Recipe {
+    id: number;
+    title: string;
+    image: string | null;
+    instructions: string;
+    author: string;
+    author_profile_image: string | null;
+    updated_at: string;
+}
+
+function MyRecipes()
 {
     const navigate = useNavigate();
-    const [recipes, setRecipes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
@@ -20,7 +36,7 @@ function Recipes()
     async function fetchRecipes()
     {
         setLoading(true);
-        const res = await fetch("/api/recipes/", {
+        const res = await fetch("/api/recipes/my/", {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
@@ -28,16 +44,16 @@ function Recipes()
         if (res.ok)
         {
             const data = await res.json();
-            setNotification({...notification, open: true, message: "Recipes fetched successfully", severity: "success"});
+            setNotification({...notification, open: true, message: "Your Recipes fetched successfully", severity: "success"});
             setRecipes(data);
         }
         else
         {
-            setNotification({...notification, open: true, message: "Failed to fetch recipes", severity: "error"});
+            setNotification({...notification, open: true, message: "Failed to fetch your recipes", severity: "error"});
         }
         setLoading(false);
     }
-    function stripMarkdown(text) {
+    function stripMarkdown(text: string): string {
         return text
             .replace(/#{1,6}\s?/g, '')
             .replace(/\*\*(.*?)\*\*/g, '$1')
@@ -52,29 +68,6 @@ function Recipes()
             .replace(/\n+/g, ' ')
             .trim();
     };
-    function handleCardClick(recipeId)
-    {
-        navigate(`/recipes/${recipeId}`);
-    }
-    async function sendRating(recipeId, event, newValue)
-    {
-        if (!newValue) return;
-        const res = await fetch(`/api/recipes/rate/${recipeId}/`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-            body: JSON.stringify({ rating: newValue })
-        });
-
-        if (res.ok) {
-            setNotification({...notification, open: true, message: "Rating submitted successfully", severity: "success"});
-            fetchRecipes();
-        } else {
-            setNotification({...notification, open: true, message: "Failed to submit rating", severity: "error"});
-        }
-    }
 
 
     return (
@@ -92,49 +85,43 @@ function Recipes()
                             <CardHeader
                                 avatar={
                                 <Tooltip title={recipe.author} placement="left-start">
-                                    <Avatar src={recipe.author_profile_image} alt={recipe.author}>
+                                    <Avatar
+                                        {...(recipe.author_profile_image && { src: recipe.author_profile_image })}
+                                        alt={recipe.author}
+                                    >
                                         {!recipe.author_profile_image && <PhotoCamera />}
                                     </Avatar>
-                                </Tooltip>}
+                                </Tooltip>
+                                }
                                 title={recipe.title}
                                 subheader={new Date(recipe.updated_at).toLocaleDateString()}
                                 action={
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <span>{recipe.average_rating} / 5</span>
-                                        <Star fontSize="small" sx={{ color: '#ffae00'}}/>
-                                    </div>
+                                    <IconButton aria-label="edit recipe" onClick={() => navigate(`/recipes/edit/${recipe.id}`)}>
+                                        <EditIcon />
+                                    </IconButton>
                                 }
                             />
                             {recipe.image ? (
                                 <CardMedia
-                                    onClick={() => handleCardClick(recipe.id)}
                                     component="img"
                                     image={recipe.image}
                                     alt={recipe.title}
-                                    style={{maxHeight: 400, objectFit: 'cover', cursor: 'pointer'}}
+                                    style={{maxHeight: 400, objectFit: 'cover'}}
                                 />
                             ): (
                                 <div
-                                    onClick={() => handleCardClick(recipe.id)}
-                                    style={{height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ecebeb', cursor: 'pointer'}}
+                                    style={{height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ecebeb'}}
                                 >
                                     <Typography variant="h6" color="text.secondary" align="center" sx={{ py: 5 }}>
                                         No image available
                                     </Typography>
                                 </div>
                             )}
-                            <CardContent onClick={() => handleCardClick(recipe.id)} sx={{ cursor: 'pointer' }}>
+                            <CardContent>
                                 <Typography variant="body2">
                                     {stripMarkdown(recipe.instructions).length > 200 ? stripMarkdown(recipe.instructions).substring(0,200) + "... " : stripMarkdown(recipe.instructions)}
                                 </Typography>
-                                <Typography variant="caption" color="primary">
-                                    Click to read more
-                                </Typography>
                             </CardContent>
-                            <Rating sx={{ ml: 2, mb: 2 }} value={recipe.user_rating || 0} defaultValue={2} size="medium" onChange={(event, newValue) => sendRating(recipe.id, event, newValue)} />
-                            <Typography variant="caption" color="text.secondary" sx={{ ml: 2, mb: 2, display: 'block' }}>
-                                {recipe.rating_count} ratings
-                            </Typography>
                         </Card>
                     ))}
                 </>
@@ -156,4 +143,4 @@ function Recipes()
         </>
     )
 }
-export default Recipes
+export default MyRecipes

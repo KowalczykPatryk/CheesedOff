@@ -2,22 +2,34 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, TextField, Stack, Container, Paper, Snackbar, Alert } from "@mui/material";
 
+
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+interface RegisterForm {
+    username: string;
+    email: string;
+    password: string;
+}
+
 function Register() 
 {
     const navigate = useNavigate();
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<RegisterForm>({
         username: "",
         email: "",
         password: "",
     });
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
     })
 
-    function handleChange(e) 
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
         setForm({
             ...form,
@@ -25,7 +37,7 @@ function Register()
         });
     }
 
-    async function handleSubmit(e) 
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) 
     {
         e.preventDefault();
 

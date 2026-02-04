@@ -1,16 +1,33 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Typography, Snackbar, Alert, CircularProgress, Card, CardHeader, CardMedia, CardContent, Avatar, Tooltip, IconButton } from "@mui/material";
-import { PhotoCamera } from "@mui/icons-material";
-import EditIcon from '@mui/icons-material/Edit';
+import { Button, Typography, Snackbar, Alert, CircularProgress, Card, CardHeader, CardMedia, CardContent, Avatar, Tooltip, Rating } from "@mui/material";
+import { PhotoCamera, Star } from "@mui/icons-material";
 
-function MyRecipes()
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+interface Recipe {
+    id: number;
+    title: string;
+    image: string | null;
+    instructions: string;
+    average_rating: number;
+    rating_count: number;
+    author_profile_image: string | null;
+    updated_at: string;
+    user_rating: number | null;
+    author: string;
+}
+
+function Recipes()
 {
     const navigate = useNavigate();
-    const [recipes, setRecipes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
@@ -21,7 +38,7 @@ function MyRecipes()
     async function fetchRecipes()
     {
         setLoading(true);
-        const res = await fetch("/api/recipes/my/", {
+        const res = await fetch("/api/recipes/", {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
@@ -29,16 +46,16 @@ function MyRecipes()
         if (res.ok)
         {
             const data = await res.json();
-            setNotification({...notification, open: true, message: "Your Recipes fetched successfully", severity: "success"});
+            setNotification({...notification, open: true, message: "Recipes fetched successfully", severity: "success"});
             setRecipes(data);
         }
         else
         {
-            setNotification({...notification, open: true, message: "Failed to fetch your recipes", severity: "error"});
+            setNotification({...notification, open: true, message: "Failed to fetch recipes", severity: "error"});
         }
         setLoading(false);
     }
-    function stripMarkdown(text) {
+    function stripMarkdown(text: string): string {
         return text
             .replace(/#{1,6}\s?/g, '')
             .replace(/\*\*(.*?)\*\*/g, '$1')
@@ -53,6 +70,29 @@ function MyRecipes()
             .replace(/\n+/g, ' ')
             .trim();
     };
+    function handleCardClick(recipeId: number)
+    {
+        navigate(`/recipes/${recipeId}`);
+    }
+    async function sendRating(recipeId: number, newValue: number | null)
+    {
+        if (!newValue) return;
+        const res = await fetch(`/api/recipes/rate/${recipeId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            body: JSON.stringify({ rating: newValue })
+        });
+
+        if (res.ok) {
+            setNotification({...notification, open: true, message: "Rating submitted successfully", severity: "success"});
+            fetchRecipes();
+        } else {
+            setNotification({...notification, open: true, message: "Failed to submit rating", severity: "error"});
+        }
+    }
 
 
     return (
@@ -70,43 +110,54 @@ function MyRecipes()
                             <CardHeader
                                 avatar={
                                 <Tooltip title={recipe.author} placement="left-start">
-                                    <Avatar
-                                        src={recipe.author_profile_image}
+                                    <Avatar 
+                                        {...(recipe.author_profile_image && { src: recipe.author_profile_image })}
                                         alt={recipe.author}
+                                        aria-label={undefined}
+                                        role="img"
                                     >
                                         {!recipe.author_profile_image && <PhotoCamera />}
                                     </Avatar>
-                                </Tooltip>
-                                }
+                                </Tooltip>}
                                 title={recipe.title}
                                 subheader={new Date(recipe.updated_at).toLocaleDateString()}
                                 action={
-                                    <IconButton aria-label="edit recipe" onClick={() => navigate(`/recipes/edit/${recipe.id}`)}>
-                                        <EditIcon />
-                                    </IconButton>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span>{recipe.average_rating} / 5</span>
+                                        <Star fontSize="small" sx={{ color: '#ffae00'}}/>
+                                    </div>
                                 }
                             />
                             {recipe.image ? (
                                 <CardMedia
+                                    onClick={() => handleCardClick(recipe.id)}
                                     component="img"
                                     image={recipe.image}
                                     alt={recipe.title}
-                                    style={{maxHeight: 400, objectFit: 'cover'}}
+                                    style={{maxHeight: 400, objectFit: 'cover', cursor: 'pointer'}}
                                 />
                             ): (
                                 <div
-                                    style={{height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ecebeb'}}
+                                    onClick={() => handleCardClick(recipe.id)}
+                                    style={{height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ecebeb', cursor: 'pointer'}}
                                 >
                                     <Typography variant="h6" color="text.secondary" align="center" sx={{ py: 5 }}>
                                         No image available
                                     </Typography>
                                 </div>
                             )}
-                            <CardContent>
+                            <CardContent onClick={() => handleCardClick(recipe.id)} sx={{ cursor: 'pointer' }}>
                                 <Typography variant="body2">
                                     {stripMarkdown(recipe.instructions).length > 200 ? stripMarkdown(recipe.instructions).substring(0,200) + "... " : stripMarkdown(recipe.instructions)}
                                 </Typography>
+                                <Typography variant="caption" color="primary">
+                                    Click to read more
+                                </Typography>
                             </CardContent>
+                            <Rating sx={{ ml: 2, mb: 2 }} value={recipe.user_rating || 0} defaultValue={2} size="medium" onChange={(_, newValue) => sendRating(recipe.id, newValue)} />
+                            <Typography variant="caption" color="text.secondary" sx={{ ml: 2, mb: 2, display: 'block' }}>
+                                {recipe.rating_count} ratings
+                            </Typography>
                         </Card>
                     ))}
                 </>
@@ -121,6 +172,8 @@ function MyRecipes()
                 onClose={() => setNotification({...notification, open: false})} 
                 severity={notification.severity} 
                 variant="filled"
+                role="alert"
+                aria-live="polite"
                 >
                     {notification.message}
                 </Alert>
@@ -128,4 +181,4 @@ function MyRecipes()
         </>
     )
 }
-export default MyRecipes
+export default Recipes

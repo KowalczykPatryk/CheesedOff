@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Box, Typography, TextField, Stack, Container, Paper, Snackbar, Alert, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Fab } from "@mui/material";
+import { Button, Box, Typography, Stack, Snackbar, Alert, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Fab } from "@mui/material";
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import LoginIcon from '@mui/icons-material/Login';
@@ -11,21 +11,31 @@ import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import FormatListBulletedAddIcon from '@mui/icons-material/FormatListBulletedAdd';
 import { isLoggedIn } from "../utils/auth";
 
-function Home() 
+type Notification = {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+};
+
+type Sidebar = {
+    open: boolean;
+};
+
+function Home(): React.JSX.Element
 {
     const navigate = useNavigate();
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
     });
 
-    const [sidebar, setSidebar] = useState({
+    const [sidebar, setSidebar] = useState<Sidebar>({
         open: false,
     });
 
-    function logout()
+    function logout(): void
     {
         localStorage.removeItem("accessToken"); 
         localStorage.removeItem("refreshToken");
@@ -106,7 +116,7 @@ function Home()
                 }}
                 >
                 <Stack spacing={3}>
-                    <Typography variant="h2" fontWeight="bold"   sx={{
+                    <Typography variant="h3" fontWeight="bold"   sx={{
                         py: 2,
                         borderRadius: "20px",
                         color: "#44370a",
@@ -133,15 +143,15 @@ function Home()
                         CheesedOff
                     </Typography>
 
-                    <Typography variant="h7" color="text.secondary">
+                    <Typography variant="body1" component="h3" color="text.secondary">
                         "The real question is should we trust people who don't like cheese?"
                     </Typography>
 
-                    <Typography variant="h8" color="text.secondary">
+                    <Typography variant="body1" component="h4" color="text.secondary">
                         Jim Gaffigan
                     </Typography>
 
-                    <Typography variant="h6" color="text.primary">
+                    <Typography variant="body1" component="h5" color="text.primary">
                         Share and manage your favorite recipes
                     </Typography>
 

@@ -3,18 +3,29 @@ import { Link } from "react-router-dom";
 import { Button, Typography, CircularProgress, Container, Snackbar, Alert, Input, Paper, Stack } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+interface Profile {
+    username: string;
+    email: string;
+    profileImage: File | null;
+}
+
 function MyProfile() {
 
-    const [loading, setLoading] = useState(false);
-    const [profile, setProfile] = useState({
+    const [loading, setLoading] = useState<boolean>(false);
+    const [profile, setProfile] = useState<Profile>({
         username: "",
         email: "",
         profileImage: null,
     });
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
@@ -52,15 +63,21 @@ function MyProfile() {
     }
 
 
-    function handleImageChange(e) 
+    function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
-        const file = e.target.files[0];
-        setSelectedImage(file);
+        const files = e.target.files;
+        if (!files || files.length === 0) {
+            setSelectedImage(null);
+            setImagePreview(null);
+            return;
+        }
+        const file = files[0];
+        setSelectedImage(file || null);
         
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setImagePreview(reader.result);
+                setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
             setProfile({...profile, profileImage: file});
@@ -68,16 +85,22 @@ function MyProfile() {
             setImagePreview(null);
         }
     };
-    function handleDrop(e) 
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) 
     {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        setSelectedImage(file);
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) {
+            setSelectedImage(null);
+            setImagePreview(null);
+            return;
+        }
+        const file = files[0];
+        setSelectedImage(file || null);
 
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setImagePreview(reader.result);
+                setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
             setProfile({...profile, profileImage: file});

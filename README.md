@@ -4,8 +4,7 @@ biblioteki React oraz języka TypeScript. Część serwerowa wykonana
 w technologii Django z użyciem Django REST Framework i komunikuje 
 się z relacyjną bazą danych SQLite. Uwierzytelnienie użytkowników 
 zrealizowane z użyciem tokenów JWT zapisywanych lokalnie w localStorage oraz przesyłanych w nagłówku przy komunikacji ze strzeżonymi endpointami. Aplikacja obsługuje trzy role użytkowników. Komunikacja pomiędzy frontendem a 
-backendem odbywać się będzie w stylu REST. Frontend zrealizowany z użyciem componentów [material UI](https://mui.com/material-ui/). 
-Interfejs użytkownika zgodny ze standardem HTML5 i poprawnie walidowany przez W3C.
+backendem odbywać się będzie w stylu REST. Frontend zrealizowany z użyciem componentów [material UI](https://mui.com/material-ui/).
 
 Temat: Dzielenie się pomysłami i przepisami na posiłek
 

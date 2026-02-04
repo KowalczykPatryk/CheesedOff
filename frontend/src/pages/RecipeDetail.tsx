@@ -4,12 +4,27 @@ import { Button, Typography, Card, CardHeader, CardMedia, CardContent, Avatar, C
 import { PhotoCamera } from "@mui/icons-material";
 import { marked } from "marked";
 
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+interface Recipe {
+    id: number;
+    title: string;
+    image: string | null;
+    instructions: string;
+    author: string;
+    author_profile_image: string | null;
+    updated_at: string;
+}
+
 function RecipeDetail() {
     const { id } = useParams();
-    const [recipe, setRecipe] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [recipe, setRecipe] = useState<Recipe | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
@@ -38,8 +53,12 @@ function RecipeDetail() {
         setLoading(false);
     }
 
-    function renderMarkdownToHtml(markdownText) {
-        return marked(markdownText);
+    function renderMarkdownToHtml(markdownText: string): string {
+        const result = marked(markdownText);
+        if (typeof result === 'string') {
+            return result;
+        }
+        return '';
     }
 
     return (
@@ -62,7 +81,7 @@ function RecipeDetail() {
                                 avatar={
                                 <Tooltip title={recipe.author} placement="left-start">
                                     <Avatar
-                                        src={recipe.author_profile_image}
+                                        {...(recipe.author_profile_image && { src: recipe.author_profile_image })}
                                         alt={recipe.author}
                                     >
                                         {!recipe.author_profile_image && <PhotoCamera />}

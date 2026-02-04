@@ -1,6 +1,11 @@
 import { Navigate } from "react-router-dom";
+import { ReactNode } from "react";
 
-function AuthenticatedRoute({ children }) {
+interface AuthenticatedRouteProps {
+  children: ReactNode;
+}
+
+function AuthenticatedRoute({ children }: AuthenticatedRouteProps) {
   const accessToken = localStorage.getItem("accessToken");
 
   if (!accessToken) {
@@ -12,7 +17,7 @@ function AuthenticatedRoute({ children }) {
     }}/>;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 export default AuthenticatedRoute;

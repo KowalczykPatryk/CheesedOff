@@ -1,26 +1,40 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Input, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
+import { Button, Container, Paper, Stack, TextField, TextareaAutosize, Tooltip, Typography, Snackbar, Alert, CircularProgress, Input } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 
-function AddRecipe()
+
+
+interface FormData {
+    title: string;
+    image: File | null;
+    instructions: string;
+}
+
+interface Notification {
+    open: boolean;
+    message: string;
+    severity: "success" | "info" | "warning" | "error";
+}
+
+function AddRecipe(): React.JSX.Element
 {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({
+    const [loading, setLoading] = useState<boolean>(false);
+    const [form, setForm] = useState<FormData>({
         title: "",
         image: null,
         instructions: "",
     });
-    const [notification, setNotification] = useState({
+    const [notification, setNotification] = useState<Notification>({
         open: false,
         message: "",
         severity: "success"
     });
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    function handleTitleChange(e) 
+    function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
         setForm({
             ...form,
@@ -28,15 +42,21 @@ function AddRecipe()
         });
     };
 
-    function handleImageChange(e) 
+    function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) 
     {
-        const file = e.target.files[0];
-        setSelectedImage(file);
+        const files = e.target.files;
+        if (!files || files.length === 0) {
+            setSelectedImage(null);
+            setImagePreview(null);
+            return;
+        }
+        const file = files[0];
+        setSelectedImage(file || null);
         
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setImagePreview(reader.result);
+                setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
             setForm({...form, image: file});
@@ -44,23 +64,30 @@ function AddRecipe()
             setImagePreview(null);
         }
     };
-    function handleTextChange(e)
+    function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>)
     {
         setForm({
             ...form,
             instructions: e.target.value,
         });
     }
-    function handleDrop(e) 
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) 
     {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        setSelectedImage(file);
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) {
+            setSelectedImage(null);
+            setImagePreview(null);
+            return;
+        }
+    
+        const file = files[0];
+        setSelectedImage(file || null);
 
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                setImagePreview(reader.result);
+                setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
             setForm({...form, image: file});
@@ -69,7 +96,7 @@ function AddRecipe()
         }
     };
 
-    async function handleSubmit(e)
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>)
     {
         e.preventDefault();
         setLoading(true);
@@ -162,6 +189,7 @@ function AddRecipe()
                                     minRows={10}
                                     placeholder="Your recipe instructions..."
                                     style={{ width: "96%", padding: "15px", fontSize: "16px" }}
+                                    value={form.instructions}
                                     onChange={handleTextChange}
                                     />
                                 </Tooltip>
