@@ -220,5 +220,5 @@ frontend/build/
 # db.sqlite3
 
 # Media files (user uploads)
-backend/media/
-media/
+# backend/media/
+# media/
